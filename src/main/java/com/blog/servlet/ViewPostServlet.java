@@ -43,6 +43,10 @@ public class ViewPostServlet extends HttpServlet {
             Post post = postDAO.getPostById(id, loggedInUserId);
 
             if (post != null) {
+                // --- NEW: Fetch Tags ---
+                String tags = postDAO.getTagsForPost(id);
+                request.setAttribute("tags", tags);
+
                 // Fetch comments using the commentDAO instance
                 List<Comment> comments = commentDAO.getCommentsByPost(id);
 

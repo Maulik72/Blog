@@ -49,6 +49,17 @@
             | <i class="bi bi-calendar3"></i> Published: ${post.createdAt}
         </p>
 
+        <div class="mb-4">
+                    <span class="badge bg-primary me-2">
+                        <i class="bi bi-folder2-open"></i> ${not empty post.categoryName ? post.categoryName : 'Uncategorized'}
+                    </span>
+                    <c:if test="${not empty tags}">
+                        <c:forEach var="tag" items="${tags.split(',')}">
+                            <span class="badge bg-secondary me-1"><i class="bi bi-hash"></i>${tag.trim()}</span>
+                        </c:forEach>
+                    </c:if>
+                </div>
+
         <div class="post-content mb-4 text-dark">
             ${post.content}
         </div>

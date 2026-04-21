@@ -15,6 +15,7 @@ public class Post {
     // Extra field for the UI (joined from Users table)
     private String authorName;
     private int likesCount;
+    private String categoryName;
 
 
     // Empty constructor
@@ -67,5 +68,13 @@ public class Post {
 
     public void setDislikesCount(int dislikesCount) {
         this.dislikesCount = dislikesCount;
+    }
+
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
     }
 }
