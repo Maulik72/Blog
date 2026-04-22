@@ -26,14 +26,20 @@
                         <div class="alert alert-danger">${error}</div>
                     </c:if>
 
-                    <form action="login" method="POST">
+                    <form action="login" method="POST" class="needs-validation" novalidate>
                         <div class="mb-3">
                             <label class="form-label">Email address</label>
                             <input type="email" name="email" class="form-control" required>
+                            <div class="invalid-feedback">
+                                Please enter a valid email address.
+                            </div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Password</label>
                             <input type="password" name="password" class="form-control" required>
+                            <div class="invalid-feedback">
+                                Please enter your password.
+                            </div>
                         </div>
                         <button type="submit" class="btn btn-success w-100">Login</button>
                     </form>
@@ -45,6 +51,22 @@
         </div>
     </div>
 </div>
+
+<script>
+    (() => {
+      'use strict'
+      const forms = document.querySelectorAll('.needs-validation')
+      Array.from(forms).forEach(form => {
+        form.addEventListener('submit', event => {
+          if (!form.checkValidity()) {
+            event.preventDefault()
+            event.stopPropagation()
+          }
+          form.classList.add('was-validated')
+        }, false)
+      })
+    })()
+</script>
 
 </body>
 </html>
