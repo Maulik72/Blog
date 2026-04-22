@@ -61,17 +61,20 @@ public class PostDAO {
         String sql = "SELECT p.*, u.username, c.name AS category_name, " +
                 "(SELECT COUNT(*) FROM post_reactions WHERE post_id = p.id AND reaction_type = 'LIKE') AS likes_count, " +
                 "(SELECT COUNT(*) FROM post_reactions WHERE post_id = p.id AND reaction_type = 'DISLIKE') AS dislikes_count, " +
-                "(SELECT reaction_type FROM post_reactions WHERE post_id = p.id AND user_id = ?) AS user_reaction " +
+                "(SELECT reaction_type FROM post_reactions WHERE post_id = p.id AND user_id = ?) AS user_reaction, " +
+                // --- NEW: Check if Bookmarked ---
+                "(SELECT COUNT(*) FROM bookmarks WHERE post_id = p.id AND user_id = ?) AS is_bookmarked " +
                 "FROM posts p " +
                 "JOIN users u ON p.user_id = u.id " +
-                "LEFT JOIN categories c ON p.category_id = c.id " + // <--- NEW JOIN
+                "LEFT JOIN categories c ON p.category_id = c.id " +
                 "WHERE p.id = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, loggedInUserId);
-            stmt.setInt(2, id);
+            stmt.setInt(2, loggedInUserId); // Pass the user ID again for the bookmark check
+            stmt.setInt(3, id);
 
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
@@ -79,13 +82,11 @@ public class PostDAO {
                 post.setId(rs.getInt("id"));
                 post.setUserId(rs.getInt("user_id"));
 
-                // --- NEW: Category Data ---
                 int catId = rs.getInt("category_id");
                 if (!rs.wasNull()) {
                     post.setCategoryId(catId);
                     post.setCategoryName(rs.getString("category_name"));
                 }
-                // --------------------------
 
                 post.setTitle(rs.getString("title"));
                 post.setContent(rs.getString("content"));
@@ -94,6 +95,10 @@ public class PostDAO {
                 post.setLikesCount(rs.getInt("likes_count"));
                 post.setDislikesCount(rs.getInt("dislikes_count"));
                 post.setCurrentUserReaction(rs.getString("user_reaction"));
+
+                // --- NEW: Set Bookmark Status ---
+                post.setBookmarked(rs.getInt("is_bookmarked") > 0);
+
                 return post;
             }
         } catch (SQLException e) { e.printStackTrace(); }
@@ -449,4 +454,152 @@ public class PostDAO {
         } catch (SQLException e) { e.printStackTrace(); }
         return false;
     }
+
+    // 1. Advanced Search: Handles Keywords, Optional Category, and Pagination
+    public List<Post> searchPostsPaginated(String keyword, Integer categoryId, int offset, int limit) {
+        List<Post> posts = new ArrayList<>();
+
+        // Build dynamic SQL based on whether a category is selected
+        StringBuilder sql = new StringBuilder(
+                "SELECT p.*, u.username, c.name AS category_name " +
+                        "FROM posts p JOIN users u ON p.user_id = u.id " +
+                        "LEFT JOIN categories c ON p.category_id = c.id " +
+                        "WHERE p.status = 'PUBLISHED' AND (p.title LIKE ? OR p.content LIKE ?) "
+        );
+
+        if (categoryId != null && categoryId > 0) {
+            sql.append(" AND p.category_id = ? ");
+        }
+        sql.append(" ORDER BY p.created_at DESC LIMIT ? OFFSET ?");
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+            String searchPattern = "%" + keyword + "%";
+            stmt.setString(1, searchPattern);
+            stmt.setString(2, searchPattern);
+
+            int paramIndex = 3;
+            if (categoryId != null && categoryId > 0) {
+                stmt.setInt(paramIndex++, categoryId);
+            }
+            stmt.setInt(paramIndex++, limit);
+            stmt.setInt(paramIndex, offset);
+
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Post post = new Post();
+                post.setId(rs.getInt("id"));
+                post.setUserId(rs.getInt("user_id"));
+
+                int catId = rs.getInt("category_id");
+                if (!rs.wasNull()) {
+                    post.setCategoryId(catId);
+                    post.setCategoryName(rs.getString("category_name"));
+                }
+
+                post.setTitle(rs.getString("title"));
+                post.setContent(rs.getString("content"));
+                post.setCreatedAt(rs.getTimestamp("created_at"));
+                post.setAuthorName(rs.getString("username"));
+                posts.add(post);
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return posts;
+    }
+
+    // 2. Count Total Search Results for Pagination
+    public int getTotalSearchPostsCount(String keyword, Integer categoryId) {
+        int total = 0;
+        StringBuilder sql = new StringBuilder(
+                "SELECT COUNT(*) FROM posts WHERE status = 'PUBLISHED' AND (title LIKE ? OR content LIKE ?)"
+        );
+
+        if (categoryId != null && categoryId > 0) {
+            sql.append(" AND category_id = ?");
+        }
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+            String searchPattern = "%" + keyword + "%";
+            stmt.setString(1, searchPattern);
+            stmt.setString(2, searchPattern);
+
+            if (categoryId != null && categoryId > 0) {
+                stmt.setInt(3, categoryId);
+            }
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) total = rs.getInt(1);
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return total;
+    }
+
+    // --- ADMIN METHODS ---
+
+    // 1. Fetch ALL posts (Drafts and Published) for the Admin Table
+    public List<Post> getAllPostsForAdmin() {
+        List<Post> posts = new ArrayList<>();
+        String sql = "SELECT p.*, u.username, c.name AS category_name " +
+                "FROM posts p JOIN users u ON p.user_id = u.id " +
+                "LEFT JOIN categories c ON p.category_id = c.id " +
+                "ORDER BY p.created_at DESC";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                Post post = new Post();
+                post.setId(rs.getInt("id"));
+                post.setUserId(rs.getInt("user_id"));
+
+                int catId = rs.getInt("category_id");
+                if (!rs.wasNull()) {
+                    post.setCategoryId(catId);
+                    post.setCategoryName(rs.getString("category_name"));
+                }
+
+                post.setTitle(rs.getString("title"));
+                post.setStatus(rs.getString("status")); // Crucial for moderation
+                post.setCreatedAt(rs.getTimestamp("created_at"));
+                post.setAuthorName(rs.getString("username"));
+                posts.add(post);
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return posts;
+    }
+
+    // 2. Change the status of a post (Unpublish / Publish)
+    public boolean updatePostStatus(int postId, String newStatus) {
+        String sql = "UPDATE posts SET status = ? WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, newStatus);
+            stmt.setInt(2, postId);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // 2. ADMIN DELETE (Overloaded): No user ownership check
+    public boolean deletePost(int postId) {
+        // ADMIN POWER: Notice there is no user check here. It just deletes it.
+        String sql = "DELETE FROM posts WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, postId);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 }

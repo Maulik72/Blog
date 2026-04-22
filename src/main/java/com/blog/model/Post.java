@@ -16,7 +16,10 @@ public class Post {
     private String authorName;
     private int likesCount;
     private String categoryName;
+    private boolean Bookmarked;
 
+    public boolean isBookmarked() { return Bookmarked; }
+    public void setBookmarked(boolean bookmarked) { Bookmarked = bookmarked; }
 
     // Empty constructor
     public Post() {}

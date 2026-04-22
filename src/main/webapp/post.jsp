@@ -50,15 +50,15 @@
         </p>
 
         <div class="mb-4">
-                    <span class="badge bg-primary me-2">
-                        <i class="bi bi-folder2-open"></i> ${not empty post.categoryName ? post.categoryName : 'Uncategorized'}
-                    </span>
-                    <c:if test="${not empty tags}">
-                        <c:forEach var="tag" items="${tags.split(',')}">
-                            <span class="badge bg-secondary me-1"><i class="bi bi-hash"></i>${tag.trim()}</span>
-                        </c:forEach>
-                    </c:if>
-                </div>
+            <span class="badge bg-primary me-2">
+                <i class="bi bi-folder2-open"></i> ${not empty post.categoryName ? post.categoryName : 'Uncategorized'}
+            </span>
+            <c:if test="${not empty tags}">
+                <c:forEach var="tag" items="${tags.split(',')}">
+                    <span class="badge bg-secondary me-1"><i class="bi bi-hash"></i>${tag.trim()}</span>
+                </c:forEach>
+            </c:if>
+        </div>
 
         <div class="post-content mb-4 text-dark">
             ${post.content}
@@ -66,24 +66,41 @@
 
         <hr>
 
-        <div class="d-flex align-items-center gap-3 mt-3">
-            <form action="${pageContext.request.contextPath}/react-post" method="POST" class="m-0">
-                <input type="hidden" name="postId" value="${post.id}">
-                <input type="hidden" name="action" value="LIKE">
-                <button type="submit" class="btn ${post.currentUserReaction == 'LIKE' ? 'btn-success' : 'btn-outline-success'} rounded-pill px-3">
-                    <i class="bi bi-hand-thumbs-up-fill"></i> ${post.likesCount}
-                </button>
-            </form>
+        <div class="d-flex align-items-center justify-content-between mt-3">
 
-            <form action="${pageContext.request.contextPath}/react-post" method="POST" class="m-0">
-                <input type="hidden" name="postId" value="${post.id}">
-                <input type="hidden" name="action" value="DISLIKE">
-                <button type="submit" class="btn ${post.currentUserReaction == 'DISLIKE' ? 'btn-danger' : 'btn-outline-danger'} rounded-pill px-3">
-                    <i class="bi bi-hand-thumbs-down-fill"></i> ${post.dislikesCount}
-                </button>
-            </form>
+            <div class="d-flex gap-3">
+                <form action="${pageContext.request.contextPath}/react-post" method="POST" class="m-0">
+                    <input type="hidden" name="postId" value="${post.id}">
+                    <input type="hidden" name="action" value="LIKE">
+                    <button type="submit" class="btn ${post.currentUserReaction == 'LIKE' ? 'btn-success' : 'btn-outline-success'} rounded-pill px-3">
+                        <i class="bi bi-hand-thumbs-up-fill"></i> ${post.likesCount}
+                    </button>
+                </form>
+
+                <form action="${pageContext.request.contextPath}/react-post" method="POST" class="m-0">
+                    <input type="hidden" name="postId" value="${post.id}">
+                    <input type="hidden" name="action" value="DISLIKE">
+                    <button type="submit" class="btn ${post.currentUserReaction == 'DISLIKE' ? 'btn-danger' : 'btn-outline-danger'} rounded-pill px-3">
+                        <i class="bi bi-hand-thumbs-down-fill"></i> ${post.dislikesCount}
+                    </button>
+                </form>
+            </div>
+
+            <c:if test="${not empty sessionScope.loggedUser}">
+                <form action="${pageContext.request.contextPath}/toggle-bookmark" method="POST" class="m-0">
+                    <input type="hidden" name="postId" value="${post.id}">
+                    <button type="submit" class="btn ${post.bookmarked ? 'btn-warning text-dark' : 'btn-outline-secondary'} rounded-pill px-3 fw-bold">
+                        <i class="bi ${post.bookmarked ? 'bi-bookmark-fill' : 'bi-bookmark'}"></i>
+                        ${post.bookmarked ? 'Saved' : 'Save'}
+                    </button>
+                </form>
+            </c:if>
+
         </div>
-    </div> <c:if test="${not empty sessionScope.loggedUser}">
+
+    </div>
+
+    <c:if test="${not empty sessionScope.loggedUser}">
         <div class="card p-4 shadow-sm border-0 mb-4 bg-white">
             <h5 class="mb-3"><i class="bi bi-chat-left-text"></i> Leave a comment</h5>
             <form action="add-comment" method="POST">

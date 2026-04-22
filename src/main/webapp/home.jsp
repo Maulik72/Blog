@@ -60,6 +60,13 @@
                 </li>
             </ul>
 
+            <form class="d-flex mx-lg-3 flex-grow-1" style="max-width: 400px;" action="search" method="GET">
+                            <div class="input-group">
+                                <input class="form-control border-0 bg-light" type="search" name="q" placeholder="Search posts or people..." aria-label="Search" required>
+                                <button class="btn btn-light bg-white border-0" type="submit"><i class="bi bi-search text-muted"></i></button>
+                            </div>
+                        </form>
+
             <div class="d-flex align-items-center mt-3 mt-lg-0">
                 <c:choose>
                     <c:when test="${not empty sessionScope.loggedUser}">
@@ -72,6 +79,11 @@
                         <a href="create-post" class="btn btn-primary btn-sm me-2 fw-semibold shadow-sm">
                             <i class="bi bi-pencil-square"></i> Write
                         </a>
+                        <c:if test="${sessionScope.loggedUser.role == 'ADMIN'}">
+                                <a href="admin-dashboard" class="btn btn-warning btn-sm me-2 fw-bold shadow-sm">
+                                    <i class="bi bi-shield-lock-fill"></i> Admin Panel
+                                </a>
+                            </c:if>
                         <a href="logout" class="btn btn-danger btn-sm fw-semibold shadow-sm">Logout</a>
                     </c:when>
                     <c:otherwise>
