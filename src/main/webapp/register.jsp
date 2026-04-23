@@ -22,29 +22,38 @@
                     </c:if>
 
                     <form action="register" method="POST" class="needs-validation" novalidate>
+
                         <div class="mb-3">
-                            <label class="form-label">Username</label>
-                            <input type="text" name="username" class="form-control" required minlength="3" maxlength="50">
+                            <label class="form-label fw-bold">Username</label>
+                            <input type="text" name="username" class="form-control bg-light"
+                                   required minlength="3" maxlength="20"
+                                   pattern="^[a-zA-Z0-9_]+$">
                             <div class="invalid-feedback">
-                                Username must be between 3 and 50 characters.
+                                Username must be 3-20 characters long and contain NO spaces or special characters (only letters, numbers, and underscores).
                             </div>
                         </div>
+
                         <div class="mb-3">
-                            <label class="form-label">Email address</label>
-                            <input type="email" name="email" class="form-control" required>
+                            <label class="form-label fw-bold">Email address</label>
+                            <input type="email" name="email" class="form-control bg-light" required>
                             <div class="invalid-feedback">
-                                Please enter a valid email address.
+                                Please enter a valid email address format (e.g., name@example.com).
                             </div>
                         </div>
+
                         <div class="mb-3">
-                            <label class="form-label">Password</label>
-                            <input type="password" name="password" class="form-control" required minlength="6">
+                            <label class="form-label fw-bold">Password</label>
+                            <input type="password" name="password" class="form-control bg-light"
+                                   required minlength="6" maxlength="50"
+                                   pattern="^\S+$">
                             <div class="invalid-feedback">
-                                Password must be at least 6 characters long.
+                                Password must be at least 6 characters long and cannot contain any spaces.
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100">Register</button>
+
+                        <button type="submit" class="btn btn-primary w-100 fw-bold py-2 mt-2">Register</button>
                     </form>
+
                     <div class="text-center mt-3">
                         <a href="login">Already have an account? Login here.</a>
                     </div>

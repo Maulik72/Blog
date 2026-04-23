@@ -18,8 +18,6 @@ public class Post {
     private String categoryName;
     private boolean Bookmarked;
 
-    public boolean isBookmarked() { return Bookmarked; }
-    public void setBookmarked(boolean bookmarked) { Bookmarked = bookmarked; }
 
     // Empty constructor
     public Post() {}
@@ -80,4 +78,8 @@ public class Post {
     public void setCategoryName(String categoryName) {
         this.categoryName = categoryName;
     }
+
+    public boolean isBookmarked() { return Bookmarked; }
+    public void setBookmarked(boolean bookmarked) { Bookmarked = bookmarked; }
+
 }

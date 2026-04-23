@@ -132,6 +132,17 @@
             </div>
         </c:if>
     </div>
+
+    <c:if test="${not empty sessionScope.loggedUser and sessionScope.loggedUser.id == profileUser.id}">
+        <div class="mt-5 border-top pt-4 pb-3 text-center">
+            <h5 class="text-danger fw-bold"><i class="bi bi-exclamation-triangle-fill"></i> Danger Zone</h5>
+            <p class="text-muted small">Once you delete your account, there is no going back. Please be certain.</p>
+            <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+                Delete My Account
+            </button>
+        </div>
+    </c:if>
+
 </div>
 
 <div class="modal fade" id="followersModal" tabindex="-1" aria-hidden="true">
@@ -223,6 +234,27 @@
                 <button type="submit" class="btn btn-primary px-4 fw-bold">Save Changes</button>
               </div>
           </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-danger">
+          <div class="modal-header bg-danger text-white">
+            <h5 class="modal-title fw-bold" id="deleteAccountModalLabel">Confirm Account Deletion</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p class="mb-1">Are you sure you want to permanently delete your account, <strong>${loggedUser.username}</strong>?</p>
+            <p class="text-danger small mb-0"><i class="bi bi-exclamation-triangle"></i> This action cannot be undone. All your posts, comments, and interactions will be permanently erased.</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <form action="delete-account" method="POST" class="m-0">
+                <button type="submit" class="btn btn-danger fw-bold">Confirm Delete</button>
+            </form>
+          </div>
         </div>
       </div>
     </div>

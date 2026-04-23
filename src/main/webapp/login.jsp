@@ -6,6 +6,7 @@
     <meta charset="UTF-8">
     <title>Login - Advanced Blog</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 </head>
 <body class="bg-light">
 
@@ -21,28 +22,39 @@
                         <div class="alert alert-success">Registration successful! Please login.</div>
                     </c:if>
 
+                    <%-- Account Deleted Message Display --%>
+                    <c:if test="${param.success eq 'deleted'}">
+                        <div class="alert alert-warning text-center fw-bold">
+                            <i class="bi bi-info-circle"></i> Your account and all associated data have been permanently deleted. We are sorry to see you go!
+                        </div>
+                    </c:if>
+
                     <%-- Error Message Display --%>
                     <c:if test="${not empty error}">
                         <div class="alert alert-danger">${error}</div>
                     </c:if>
 
                     <form action="login" method="POST" class="needs-validation" novalidate>
+
                         <div class="mb-3">
-                            <label class="form-label">Email address</label>
-                            <input type="email" name="email" class="form-control" required>
+                            <label class="form-label fw-bold">Email address</label>
+                            <input type="email" name="email" class="form-control bg-light" required>
                             <div class="invalid-feedback">
-                                Please enter a valid email address.
+                                Please enter your registered email address.
                             </div>
                         </div>
+
                         <div class="mb-3">
-                            <label class="form-label">Password</label>
-                            <input type="password" name="password" class="form-control" required>
+                            <label class="form-label fw-bold">Password</label>
+                            <input type="password" name="password" class="form-control bg-light" required pattern="^\S+$">
                             <div class="invalid-feedback">
-                                Please enter your password.
+                                Please enter your password (passwords do not contain spaces).
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-success w-100">Login</button>
+
+                        <button type="submit" class="btn btn-success w-100 fw-bold py-2 mt-2">Login</button>
                     </form>
+
                     <div class="text-center mt-3">
                         <a href="register">Don't have an account? Register here.</a>
                     </div>
